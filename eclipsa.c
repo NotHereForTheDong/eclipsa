@@ -45,37 +45,13 @@
 #	define VROM_PAGE_TABLE_ADDR (0x1800C8400)
 #	define ARCH_TASK_TRAMP_ADDR (0x10000D998)
 #	define IO_BUFFER_ADDR (0x18010D500)
-#	if CPID == 0x8000
+#if CPID == 0x8000
 #		define SRTG "iBoot-2234.0.0.3.3"
-#	else
-#    define PATCH_ADDR_0 (0x100007924)
-#    define PATCH_ADDR_1 (0x10000792C)
-#    define PATCH_ADDR_2 (0x100007958)
-#    define PATCH_ADDR_3 (0x100007C9C)
-#    define PATCH_ADDR_4 (0x180087954)
-#    define PATCH_ADDR_5 (0x20E0B8038)
-#    define PATCH_ADDR_6 (0x20E0B803C)
-#    define PATCH_VAL_0 (0xD503201F) /* nop */
-#    define PATCH_VAL_1 (0xD503201F) /* nop */
-#    define PATCH_VAL_2 (0xD503201F) /* nop */
-#    define PATCH_VAL_3 (0xD503201F) /* nop */
-#    define PATCH_VAL_4 (0x00000000) /* gUSBMoreOtherStatus */
-#    define PATCH_VAL_5 (0x11111111) /* Boot Nonce 0 */
-#    define PATCH_VAL_6 (0x11111111) /* Boot Nonce 1 */
-#		define SRTG "iBoot-2234.0.0.2.22"
+#else
+#	define SRTG "iBoot-2234.0.0.2.22"
 #	endif
-#	define PATCH_ADDR_0 (0x100007924)
-#	define PATCH_ADDR_1 (0x10000792C)
-#	define PATCH_ADDR_2 (0x100007958)
-#	define PATCH_ADDR_3 (0x100007C9C)
-#	define PATCH_ADDR_4 (0x180087954)
 #	define PATCH_ADDR_5 (0x20E0B8038)
-#	define PATCH_ADDR_6 (0x20E0B803C)
-#	define PATCH_VAL_0 (0xD503201F) /* nop */
-#	define PATCH_VAL_1 (0xD503201F) /* nop */
-#	define PATCH_VAL_2 (0xD503201F) /* nop */
-#	define PATCH_VAL_3 (0xD503201F) /* nop */
-#	define PATCH_VAL_4 (0x00000000) /* gUSBMoreOtherStatus */
+#	define PATCH_ADDR_6 (0x20E0B03C)
 #	define PATCH_VAL_5 (0x11111111) /* Boot Nonce 0 */
 #	define PATCH_VAL_6 (0x11111111) /* Boot Nonce 1 */
 #endif
@@ -345,20 +321,68 @@ checkm8_stage_patch(const handle_t *handle) {
 	shc = overwrite.fake_task.arch.shc;
 #if CPID == 0x8000 || CPID == 0x8003
 	overwrite.fake_task.arg = VROM_PAGE_TABLE_ADDR;
-	*shc++ = 0xD50343DF; /* msr DAIFSet, #(DAIFSC_IRQF | DAIFSC_FIQF) */
-	*shc++ = 0xD5033FDF; /* isb */
-	*shc++ = 0xF940000A; /* ldr x10, [x0] */
-	*shc++ = 0xB24B054A; /* orr x10, x10, #(ARM_TTE_BLOCK_PNX | ARM_TTE_BLOCK_NX) */
-	*shc++ = 0x9278F94A; /* bic x10, x10, #ARM_TTE_BLOCK_AP_PRIV */
-	*shc++ = 0xF900000A; /* str x10, [x0] */
-	*shc++ = 0xD5033F9F; /* dsb sy */
-	*shc++ = 0xD50E871F; /* tlbi alle3 */
-	*shc++ = 0xD5033F9F; /* dsb sy */
-	*shc++ = 0xD5033FDF; /* isb */
-	*shc++ = 0x10000328; /* adr x8, #0x64 */
+	*shc++ = 0x58000385;
+	*shc++ = 0x180003A6;
+	*shc++ = 0xB90000A6;
+	*shc++ = 0x580003A5;
+	*shc++ = 0x180003C6;
+	*shc++ = 0xB90000A6;
+	*shc++ = 0x580003C5;
+	*shc++ = 0x180003E6;
+	*shc++ = 0xB90000A6;
+	*shc++ = 0x580003E5;
+	*shc++ = 0x18000406;
+	*shc++ = 0xB90000A6;
+	*shc++ = 0x58000405;
+	*shc++ = 0x18000426;
+	*shc++ = 0xB90000A6;
+	*shc++ = 0x910010A5;
+	*shc++ = 0x180003E6;
+	*shc++ = 0xB90000A6;
+	*shc++ = 0x910010A5;
+	*shc++ = 0x5280F186;
+	*shc++ = 0xB90000A6;
+	*shc++ = 0x910010A5;
+	*shc++ = 0x52800026;
+	*shc++ = 0xB90000A6;
+	*shc++ = 0x58000305;
+	*shc++ = 0x18000326;
+	*shc++ = 0xB90000A6;
+	*shc++ = 0xD65F03C0;
+	*shc++ = 0x800879BA;
+	*shc++ = 0x01;
+	*shc++ = 0x4E575020;
+	*shc++ = 0xD503201F;
+	*shc++ = 0x800879BE;
+	*shc++ = 0x01;
+	*shc++ = 0x635B3A44;
+	*shc++ = 0xD503201F;
+	*shc++ = 0x800879C2;
+	*shc++ = 0x01;
+	*shc++ = 0x6B636568;
+	*shc++ = 0xD503201F;
+	*shc++ = 0x800879C6;
+	*shc++ = 0x01;
+	*shc++ = 0x5D386D;
+	*shc++ = 0xD503201F;
+	*shc++ = 0x800DFC00;
+	*shc++ = 0x01;
+	*shc++ = 0x58000044;
+	*shc++ = 0xD61F0080;
+	*shc++ = 0x800C2F58;
+	*shc++ = 0x01;
+	*shc++ = 0x800DFC00;  
+
+
+        *shc++ = 0x10000208; /* adr x8, #0x40 */
+	*shc++ = 0xB8404509; /* ldr w9, [x8], #4 */
+	*shc++ = 0xB9000269; /* str w9, [x19] */
+	*shc++ = 0xB9400109; /* ldr w9, [x8] */
+	*shc++ = 0xB9000289; /* str w9, [x20] */
+	*shc++ = 0xD65F03C0; /* ret */
+
 #else
 	*shc++ = 0x10000208; /* adr x8, #0x40 */
-#endif
 	*shc++ = 0xB8404509; /* ldr w9, [x8], #4 */
 	*shc++ = 0xB9000269; /* str w9, [x19] */
 	*shc++ = 0xB8404509; /* ldr w9, [x8], #4 */
@@ -373,17 +397,8 @@ checkm8_stage_patch(const handle_t *handle) {
 	*shc++ = 0xB9000309; /* str w9, [x24] */
 	*shc++ = 0xB9400109; /* ldr w9, [x8] */
 	*shc++ = 0xB9000329; /* str w9, [x25] */
-#if CPID == 0x8000 || CPID == 0x8003
-	*shc++ = 0x9249F54A; /* bic x10, x10, #(ARM_TTE_BLOCK_PNX | ARM_TTE_BLOCK_NX) */
-	*shc++ = 0xB279014A; /* orr x10, x10, #ARM_TTE_BLOCK_AP_PRIV */
-	*shc++ = 0xF900000A; /* str x10, [x0] */
-	*shc++ = 0xD5033F9F; /* dsb sy */
-	*shc++ = 0xD50E871F; /* tlbi alle3 */
-	*shc++ = 0xD5033F9F; /* dsb sy */
-	*shc++ = 0xD5033FDF; /* isb */
-	*shc++ = 0xD50343FF; /* msr DAIFClr, #(DAIFSC_IRQF | DAIFSC_FIQF) */
-	*shc++ = 0xD5033FDF; /* isb */
 #endif
+#if CPID == 0x7000 || CPID == 0x7001
 	*shc++ = 0xD65F03C0; /* ret */
 	*shc++ = PATCH_VAL_0;
 	*shc++ = PATCH_VAL_1;
@@ -399,6 +414,13 @@ checkm8_stage_patch(const handle_t *handle) {
 	overwrite.fake_task.arch.x[23] = PATCH_ADDR_4;
 	overwrite.fake_task.arch.x[24] = PATCH_ADDR_5;
 	overwrite.fake_task.arch.x[25] = PATCH_ADDR_6;
+#else
+        *shc++ = PATCH_VAL_5;
+	*shc = PATCH_VAL_6;
+        overwrite.fake_task.arch.x[19] = PATCH_ADDR_5;
+	overwrite.fake_task.arch.x[20] = PATCH_ADDR_6;
+#endif
+
 	overwrite.fake_task.magic_0 = TASK_STACK_MAGIC;
 	overwrite.fake_task.arch.lr = ARCH_TASK_TRAMP_ADDR;
 	overwrite.fake_task.stack_len = overwrite.synopsys_task.stack_len;
